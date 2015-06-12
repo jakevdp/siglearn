@@ -18,6 +18,7 @@ class LinearModel(BaseEstimator):
     def fit(self, X, y, sigma_y=None):
         X, y = self._construct_X_y(X, y, sigma_y, self.fit_intercept)
         self.model.fit(X, y)
+        return self
 
     def predict(self, X):
         X = self._transform_X(X, self.fit_intercept)
@@ -97,8 +98,12 @@ def _model_factory(BaseModel, docstring=None):
     kwarglist = ", ".join("{0}={1}".format(arg, repr(val))
                           for arg, val in zip(args[len(args) - len(defaults):],
                                               defaults))
+    print(kwarglist)
     initcode = "self.model = self.BaseModel({0})".format(', '.join(args[1:]))
-    allargs = ", ".join("{arg}={arg}".format(arg=arg) for arg in args[1:])
+    allargs = ", ".join("{arg}={arg}".format(arg=arg)
+                        if arg != 'fit_intercept'
+                        else 'fit_intercept=False'
+                        for arg in args[1:])
     arg_assignments = "\n    ".join("self.{arg} = {arg}".format(arg=arg)
                                     for arg in args[1:])
     initcode = ("def __init__({args}, {kwargs}):\n"
